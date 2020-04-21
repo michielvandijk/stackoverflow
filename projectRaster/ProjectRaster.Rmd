@@ -1,5 +1,5 @@
 ---
-title: "projectRaster results in different output when projecting with the same crs"
+title: "projectRaster results in different output when projecting with its own crs"
 author: "Michiel van Dijk"
 date: "21/04/2020"
 output: html_document
