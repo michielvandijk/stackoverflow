@@ -1,0 +1,67 @@
+---
+title: "projectRaster results in different output when projecting with its own crs"
+author: "Michiel van Dijk"
+date: "21/04/2020"
+output: html_document
+---
+
+For a function I want to reproject a raster input - itself the output after using crop and mask - using a user set CRS. I thought that projecting with the existing crs would do nothing and simply return the input raster. To my surprise this was not the case. Below a reproducible example
+
+Create dummy raster:
+
+```{r}
+library(raster)
+
+# Download country polygin, in this case Malawi
+mwi <- raster::getData("GADM", country = "MWI", level = 0)
+
+# Create dummy raster
+grid <- raster::raster() # 1 degree raster
+grid <- raster::disaggregate(grid, fact = 12) # 5 arcmin
+grid <- raster::crop(grid, mwi)
+values(grid) <- rep(1, ncell(grid)) # Set a value
+
+# The input raster with dimensions 94,39,3666
+grid <- raster::mask(grid, mwi)
+plot(grid)
+grid
+
+# Reproject the raster using its own crs. I use ngb as it is a categorical variable.
+# This raster has dimensions 102, 47, 4794 so it seems a lot of white space (NA) is added.
+own_crs <- crs(grid)
+grid_reproj <- raster::projectRaster(grid, crs = own_crs, method = "ngb")
+plot(grid_reproj)
+grid_reproj
+
+# To remove the white space I use trim
+# This results in a waster with dimensions 93, 39, 3627
+grid_trim <- raster::trim(grid_reproj)
+plot(grid_trim)
+grid_trim
+
+# I also decided to compare the maps visually with mapview
+library(mapview)
+
+# There seems to be a trim function in mapview which I set to FALSE
+# Also use the browser for easy viewing
+options(viewer = NULL)
+mapviewOptions(trim = FALSE)
+mapviewGetOption("trim")
+mapview(grid, col.regions = "green", legend = F) +
+  mapview(grid_reproj, col.regions = "red", legend = F) +
+  mapview(grid_trim, col.regions = "blue", legend = F) 
+
+```
+
+Comparing the maps I observe two things:
+
+(1) grid and grid_trim are nearly # identical apart # from a single grid cell
+on top. Perhaps this is due to rounding,
+
+(2) grid_reproj has a much larger dimensions and different extent. It also
+seems as if the map is slightly shifted in comparison to the other maps. This
+is corrected by trim, so I assume that these are in fact NA cells and might be
+related how mapview displays the maps.
+
+Hence, my main question is, what is happening when rasterProject projects with
+the same extent? And why does the result differ, even after trim?
