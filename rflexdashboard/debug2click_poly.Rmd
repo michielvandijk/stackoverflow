@@ -208,24 +208,24 @@ Column {data-width=350}
 data2 <- reactive({
 
   # Fetch data for the click poly
-  out <- df1[df1$NAME_1 == click_poly2(), ]
+  out <- df2[df2$NAME_1 == click_poly2(), ]
   print("page 2") # print statement to show which click_poly is used
   return(out)
   })
 
 
-output$plot <- renderHighchart({
+output$plot2 <- renderHighchart({
   req(data2()) # do this if click_poly() is not null
   
   chart <- highchart() %>%
       hc_chart(type = 'column') %>%
       hc_legend(enabled = FALSE) %>%
       hc_xAxis(categories = c('A'),
-               title = list(text = 'Title 1')) %>%
-      hc_yAxis(title = list(text = 'Value 1')) %>%
+               title = list(text = 'Title 2')) %>%
+      hc_yAxis(title = list(text = 'Value 2')) %>%
       hc_plotOptions(series = list(dataLabels = list(enabled = TRUE))) %>%
       hc_add_series(name = 'Series', 
-                    data = c(data2()$value_1)) %>%
+                    data = c(data2()$value_2)) %>%
       hc_add_theme(hc_theme_smpl()) %>%
       hc_colors(c('#d01010'))
   })
