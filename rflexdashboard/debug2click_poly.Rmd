@@ -1,0 +1,237 @@
+---
+title: "Dhaka food systems dashboard"
+author: "version 0.0001"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  flexdashboard::flex_dashboard:
+    theme: simplex
+    vertical_layout: fill
+    social: menu
+    source_code: embed
+runtime: shiny
+---
+
+I am in the process of creating an R flexdashboard. The dashboard contains several maps for Bangladesh, which are linked to a (Highcharts) chart that is activated by clicking on a polygon (e.g. region). I am able to make it work for one page. However, if I set it up for two pages, things no longer work. 
+
+It seems that flexdashboard (at least how I set it up) is not able to handle two input\$map_shape_click operations at the same time. At the moment it only works on the first page, while there is no reaction on the second page. Interestingly, the print statement I added indicates that it is actually the second input\$map_shape_click that is actived but resulting in an operation on the first page (?). I welcome any suggestions to solve this.
+
+Below a reproducible example (Note that I omitted the flexdashboard yaml in the example):
+
+```{r global, include = FALSE}
+# Packages
+library(tidyverse)
+library(raster)
+library(sf)
+library(highcharter)
+library(leaflet)
+library(htmltools)
+
+# Get data
+adm1 <- getData('GADM', country='BGD', level=1)
+adm1 <- st_as_sf(adm1)
+
+# Create dummy data.frames with link to polygon
+df1 <- data.frame(NAME_1 = adm1$NAME_1,
+                 value_1 = c(1:7))
+
+df2 <- data.frame(NAME_1 = adm1$NAME_1,
+                 value_2 = c(8:14))
+```
+
+
+Page 1
+=======================================================================
+
+Column {data-width=350} 
+-------------------------------------
+
+### Map 1
+
+```{r}
+# MAIN MAP --------------------------------------------------------------------------------
+output$map <- renderLeaflet({
+
+  # Base map
+  leaflet() %>%
+    addTiles(group = "OpenStreetMap") %>%
+    clearShapes() %>%
+    addPolygons(data = adm1, 
+                smoothFactor = 0, 
+                color = "black",
+                opacity = 1,
+                fillColor = "transparent",
+                weight = 0.5,
+                stroke = TRUE,
+                label = ~htmlEscape(NAME_1),
+                layerId = ~NAME_1,
+                )
+  
+})
+leafletOutput('map')  
+
+
+# REGION SELECTION -----------------------------------------------------------------------
+
+# Click event for the map to draw chart
+click_poly <- eventReactive(input$map_shape_click, {
+
+  x <- input$map_shape_click
+  y <- x$id
+  return(y)
+}, ignoreNULL = TRUE) 
+
+
+observe({
+  req(click_poly()) # do this if click_poly() is not null
+
+  # Add the clicked poly and remove when a new one is clicked
+  map <- leafletProxy('map') %>%
+      removeShape('NAME_1') %>%
+      addPolygons(data = adm1[adm1$NAME_1 == click_poly(), ],
+                  fill = FALSE,
+                  weight = 4,
+                  color = '#d01010', 
+                  opacity = 1, 
+                  layerId = 'NAME_1')
+  })
+
+```
+
+
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Plot 1
+
+
+```{r}
+
+data <- reactive({
+
+  # Fetch data for the click poly
+  out <- df1[df1$NAME_1 == click_poly(), ]
+  print("page 1") # print statement to show which click_poly is used
+  return(out)
+  })
+
+
+output$plot <- renderHighchart({
+  req(data()) # do this if click_poly() is not null
+  
+  chart <- highchart() %>%
+      hc_chart(type = 'column') %>%
+      hc_legend(enabled = FALSE) %>%
+      hc_xAxis(categories = c('A'),
+               title = list(text = 'Title 1')) %>%
+      hc_yAxis(title = list(text = 'Value 1')) %>%
+      hc_plotOptions(series = list(dataLabels = list(enabled = TRUE))) %>%
+      hc_add_series(name = 'Series', 
+                    data = c(data()$value_1)) %>%
+      hc_add_theme(hc_theme_smpl()) %>%
+      hc_colors(c('#d01010'))
+  })
+
+highchartOutput('plot')
+
+```
+
+
+Page 2
+=======================================================================
+
+Column {data-width=350}
+-------------------------------------
+
+### Map 2
+
+```{r}
+# MAIN MAP --------------------------------------------------------------------------------
+output$map2 <- renderLeaflet({
+
+  # Base map
+  leaflet() %>%
+    addTiles(group = "OpenStreetMap") %>%
+    clearShapes() %>%
+    addPolygons(data = adm1, 
+                smoothFactor = 0, 
+                color = "black",
+                opacity = 1,
+                fillColor = "transparent",
+                weight = 0.5,
+                stroke = TRUE,
+                label = ~htmlEscape(NAME_1),
+                layerId = ~NAME_1,
+                )
+  
+})
+leafletOutput('map2')  
+
+
+# REGION SELECTION -----------------------------------------------------------------------
+
+# Click event for the map to draw chart
+click_poly2 <- eventReactive(input$map_shape_click, {
+
+  x <- input$map_shape_click
+  y <- x$id
+  return(y)
+}, ignoreNULL = TRUE) 
+
+
+observe({
+  req(click_poly2()) # do this if click_poly() is not null
+
+  # Add the clicked poly and remove when a new one is clicked
+  map <- leafletProxy('map2') %>%
+      removeShape('NAME_1') %>%
+      addPolygons(data = adm1[adm1$NAME_1 == click_poly2(), ],
+                  fill = FALSE,
+                  weight = 4,
+                  color = '#d01010', 
+                  opacity = 1, 
+                  layerId = 'NAME_1')
+  })
+
+```
+
+
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Plot 2
+
+
+```{r}
+
+data2 <- reactive({
+
+  # Fetch data for the click poly
+  out <- df1[df1$NAME_1 == click_poly2(), ]
+  print("page 2") # print statement to show which click_poly is used
+  return(out)
+  })
+
+
+output$plot <- renderHighchart({
+  req(data2()) # do this if click_poly() is not null
+  
+  chart <- highchart() %>%
+      hc_chart(type = 'column') %>%
+      hc_legend(enabled = FALSE) %>%
+      hc_xAxis(categories = c('A'),
+               title = list(text = 'Title 1')) %>%
+      hc_yAxis(title = list(text = 'Value 1')) %>%
+      hc_plotOptions(series = list(dataLabels = list(enabled = TRUE))) %>%
+      hc_add_series(name = 'Series', 
+                    data = c(data2()$value_1)) %>%
+      hc_add_theme(hc_theme_smpl()) %>%
+      hc_colors(c('#d01010'))
+  })
+
+highchartOutput('plot2')
+
+```
+
+
