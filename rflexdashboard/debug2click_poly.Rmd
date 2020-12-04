@@ -29,6 +29,7 @@ library(htmltools)
 # Get data
 adm1 <- getData('GADM', country='BGD', level=1)
 adm1 <- st_as_sf(adm1)
+adm2 <- adm1
 
 # Create dummy data.frames with link to polygon
 df1 <- data.frame(NAME_1 = adm1$NAME_1,
@@ -77,6 +78,7 @@ click_poly <- eventReactive(input$map_shape_click, {
 
   x <- input$map_shape_click
   y <- x$id
+  print(y)
   return(y)
 }, ignoreNULL = TRUE) 
 
@@ -153,7 +155,7 @@ output$map2 <- renderLeaflet({
   leaflet() %>%
     addTiles(group = "OpenStreetMap") %>%
     clearShapes() %>%
-    addPolygons(data = adm1, 
+    addPolygons(data = adm2, 
                 smoothFactor = 0, 
                 color = "black",
                 opacity = 1,
@@ -171,10 +173,11 @@ leafletOutput('map2')
 # REGION SELECTION -----------------------------------------------------------------------
 
 # Click event for the map to draw chart
-click_poly2 <- eventReactive(input$map_shape_click, {
+click_poly2 <- eventReactive(input$map2_shape_click, {
 
-  x <- input$map_shape_click
+  x <- input$map2_shape_click
   y <- x$id
+  print(y)
   return(y)
 }, ignoreNULL = TRUE) 
 
