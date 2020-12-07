@@ -1,0 +1,38 @@
+---
+title: "bib with particle"
+author: "Michiel van Dijk"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  bookdown::pdf_document2:
+    citation_package: biblatex
+  keep_tex: true
+  toc: true
+  number_sections: true
+  dev: png
+  pandoc_args:
+      - '--lua-filter=scholarly-metadata.lua'
+      - '--lua-filter=author-info-blocks.lua'
+biblatexoptions: [backend=biber, useprefix=true, style=apa, citestyle=authoryear]
+bibliography: my-pubs.bib
+---
+
+# Note
+For some reasons, standard use of bib file + cls removes the 'van' part of names. Use of the biblatex package will overcome this but its implementation seems very tedious. The above works but if a second output (bookdown::word_document2:) is added an error is produced. It seems that
+
+biblatexoptions: [backend=biber, useprefix=true, style=apa, citestyle=authoryear]
+
+only works when it is not indended (i.e. no spaces before). However, when this is done any further indented input into Ouput is not  allowed (e.g. bookdown::word_document2). 
+
+
+
+
+Example in text citation
+
+@VanDijk2020a
+@VanDijk2014a
+@VanDijk2005
+
+
+
+# References
+

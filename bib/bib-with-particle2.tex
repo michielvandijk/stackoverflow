@@ -1,0 +1,102 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={bib with particle2},
+  pdfauthor={Michiel van Dijk},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{bib with particle2}
+\author{Michiel van Dijk}
+\date{December 07, 2020}
+
+\begin{document}
+\maketitle
+
+\usepackage[style=apa]{biblatex}
+
+Example in text citation
+
+van Dijk (2012) Dijk (2020) Dijk (2014) Dijk (2005)
+
+\hypertarget{references}{%
+\section*{References}\label{references}}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\leavevmode\hypertarget{ref-VanDijk2005}{}%
+Dijk, Michiel van. 2005. ``Industry evolution and catching up in
+developing countries: the case of the Indonesian pulp and paper
+industry.'' PhD thesis, Eindhoven University of Technology.
+\url{https://doi.org/10.6100/IR585866}.
+
+\leavevmode\hypertarget{ref-VanDijk2014a}{}%
+Dijk, van Michiel. 2014. ``Engaging stakeholders in developing food
+security scenarios.'' In \emph{The Food Puzzle: Pathways to Securing
+Food for All}, edited by Thom Achterbosch, 40--42. Wageningen
+University.
+
+\leavevmode\hypertarget{ref-VanDijk2020a}{}%
+Dijk, Michiel van. 2020. ``Global food demand projections: A review.''
+In \emph{Choose Food: An Ethical Basis for Food Production}, edited by
+Alan Goldberg. John Hopkins University Press.
+
+\leavevmode\hypertarget{ref-vanDijk2012}{}%
+van Dijk, Michiel. 2012. ``Food Security.'' \emph{Nature Materials} 11
+(4): 261--63. \url{https://doi.org/10.1038/nmat3283}.
+
+\end{document}
