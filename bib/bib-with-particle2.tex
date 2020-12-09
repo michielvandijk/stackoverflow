@@ -42,6 +42,15 @@
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
 \usepackage[margin=1in]{geometry}
+\usepackage{longtable,booktabs}
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
 \usepackage{graphicx,grffile}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -58,45 +67,38 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\setcounter{secnumdepth}{5}
+\usepackage[backend=biber, useprefix=true, style=apa, citestyle=authoryear, uniquelist=minyear, doi=true, url=false, clearlang=true, annotation=false, uniquename=true]{biblatex}
+\usepackage[]{biblatex}
+\addbibresource{gfsp-review.bib}
 
 \title{bib with particle2}
-\author{Michiel van Dijk}
-\date{December 07, 2020}
+\author{Michiel van Dijk\textsuperscript{}}
+\date{December 09, 2020}
 
 \begin{document}
 \maketitle
 
-\usepackage[style=apa]{biblatex}
+Note:
+
+\begin{itemize}
+\tightlist
+\item
+  lua filters are for adding multiple authors and affiliations. Not all features are used here.
+\item
+  knit: sets which formats are rendered. All can be replaced by bookdown::pdf\_document2/bookdown::word\_document2
+\item
+  Use package command for biblatex defines setting for biblatex. useprefix=true ensures `van' is printed in front of the last name, clearlang=false removes language setting if the article is in English, annotation=false removes annote field which otherwise might add clutter to the reference,. uniquename=false ensures that initials of authors are not printed when two surnames are the same. This happens by mistake if See biblatex manual for all settings.
+\end{itemize}
 
 Example in text citation
 
-van Dijk (2012) Dijk (2020) Dijk (2014) Dijk (2005)
+\textcite{IAASTD2009}
+\textcite{VanDijk2020c}
+\textcite{VanVuuren2012}
+\textcite{Hasegawa2014a}
+\textcite{Hasegawa2018a}
 
-\hypertarget{references}{%
-\section*{References}\label{references}}
-\addcontentsline{toc}{section}{References}
-
-\hypertarget{refs}{}
-\leavevmode\hypertarget{ref-VanDijk2005}{}%
-Dijk, Michiel van. 2005. ``Industry evolution and catching up in
-developing countries: the case of the Indonesian pulp and paper
-industry.'' PhD thesis, Eindhoven University of Technology.
-\url{https://doi.org/10.6100/IR585866}.
-
-\leavevmode\hypertarget{ref-VanDijk2014a}{}%
-Dijk, van Michiel. 2014. ``Engaging stakeholders in developing food
-security scenarios.'' In \emph{The Food Puzzle: Pathways to Securing
-Food for All}, edited by Thom Achterbosch, 40--42. Wageningen
-University.
-
-\leavevmode\hypertarget{ref-VanDijk2020a}{}%
-Dijk, Michiel van. 2020. ``Global food demand projections: A review.''
-In \emph{Choose Food: An Ethical Basis for Food Production}, edited by
-Alan Goldberg. John Hopkins University Press.
-
-\leavevmode\hypertarget{ref-vanDijk2012}{}%
-van Dijk, Michiel. 2012. ``Food Security.'' \emph{Nature Materials} 11
-(4): 261--63. \url{https://doi.org/10.1038/nmat3283}.
+\printbibliography[title=References]
 
 \end{document}

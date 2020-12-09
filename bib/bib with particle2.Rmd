@@ -3,37 +3,43 @@ title: "bib with particle2"
 author: "Michiel van Dijk"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
-  bookdown::pdf_document2
-bibliography: my-pubs.bib
-references:
-- id: vanDijk2012
-  title: Food security
-  author:
-  - family: van Dijk
-    given: Michiel
-  container-title: Nature Materials
-  volume: 11
-  URL: 'http://dx.doi.org/10.1038/nmat3283'
-  DOI: 10.1038/nmat3283
-  issue: 4
-  publisher: Nature Publishing Group
-  page: 261-263
-  type: article-journal
-  issued:
-    year: 2012
-    month: 3
+ bookdown::pdf_document2:
+  citation_package: biblatex
+  keep_tex: true
+  toc: false
+  number_sections: true
+  dev: png
+  pandoc_args:
+      - '--lua-filter=scholarly-metadata.lua'
+      - '--lua-filter=author-info-blocks.lua'
+ bookdown::word_document2:
+   reference_docx: word_style.docx
+   pandoc_args:
+        - '--lua-filter=scholarly-metadata.lua'
+        - '--lua-filter=author-info-blocks.lua'
+bibliography: gfsp-review.bib
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding,
+  output_format = "all")})
+header-includes:
+  \usepackage[backend=biber, useprefix=true, style=apa, citestyle=authoryear, 
+  uniquelist=minyear, doi=true, url=false, clearlang=true, annotation=false,
+  uniquename=true]{biblatex}
 ---
 
-\usepackage[style=apa]{biblatex}
+Note:
 
-
+- lua filters are for adding multiple authors and affiliations. Not all features are used here.
+- knit: sets which formats are rendered. All can be replaced by bookdown::pdf_document2/bookdown::word_document2
+- Use package command for biblatex defines setting for biblatex. useprefix=true ensures 'van' is printed in front of the last name, clearlang=false removes language setting if the article is in English, annotation=false removes annote field which otherwise might add clutter to the reference,. uniquename=false ensures that initials of authors are not printed when two surnames are the same. This happens by mistake if the .bib file is inconsistent (e.g. has an entry for Michiel van Dijk and M. van dijk. See biblatex manual for all other settings.
 
 Example in text citation
 
-@vanDijk2012
-@VanDijk2020a
-@VanDijk2014a
-@VanDijk2005
+@IAASTD2009
+@VanDijk2020c
+@VanVuuren2012
+@Hasegawa2014a
+@Hasegawa2018a
 
 
 

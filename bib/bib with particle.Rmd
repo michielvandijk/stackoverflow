@@ -14,6 +14,9 @@ output:
       - '--lua-filter=author-info-blocks.lua'
 biblatexoptions: [backend=biber, useprefix=true, style=apa, citestyle=authoryear]
 bibliography: my-pubs.bib
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding,
+  output_format = "all")})
 ---
 
 # Note
