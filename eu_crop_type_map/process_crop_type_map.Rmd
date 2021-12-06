@@ -1,0 +1,60 @@
+---
+title: "Process high-resolution raster with R/GDAL"
+author: "Michiel van Dijk"
+date: "12/6/2021"
+output: html_document
+---
+
+I am currently processing a new crop type map for Europe, which can be downloaded from here: https://data.jrc.ec.europa.eu/dataset/15f86c84-eae1-4723-8e00-c1b35c8f56b9 (~ 6GB). The map depicts the locations of 19 crops at a resolution of 10x10m. I want to convert it into 19 maps, where each pixel shows the share of a specific crop on a 250x250 grid. I am looking for a workable solution that does this for one crop. With this available I can create a function and loop it over all crops with lapply.
+
+My current approach for maize (value 216 in the crop map) is to create a map where all observations for maize are recoded to 1 and the rest to 0 using the R Raster package. In the next step I am running gdalwarp (using the R gdalUtilities package) and calculate the average over a grid of 250x250m. This should give the correct result but unfortunately the reclassification does not work due to the size of the raster. This does not seem to work as even after running for more than 6 hours using a subset of the data (a province in Luxembourg), I get the following error message: 
+
+In writeBin(v, x@file@con, size = x@file@dsize) :
+  problem writing to connection
+
+I can see that Raster created several very large files but there is still around 20GB left on my HD (216 GB free HD and 32 RAM). Perhaps the reclassification part can be done with GDAL as well? In my experience GDAL is often more powerful than the Raster package, particularly when large files need to be processed. This is the REPEX:
+
+  
+```{r}
+# Packages
+library(raster)
+library(sf)
+library(gdalUtilities)
+library(tictoc)
+
+# Load map
+input <- file.path("c:/temp/EUCROPMAP_2018.tif")
+r <- raster(input)
+
+# Get Luxembourg polygon
+poly <- st_as_sf(getData(name = "GADM", country = "LUX", level = 2))
+
+# Reproject
+poly <- st_transform(poly, crs(r))
+
+# select a province
+poly <- poly %>%
+  filter(NAME_2 == "Vianden")
+
+# Crop
+r_crop <- crop(r, poly)
+plot(r_crop)
+plot(poly$geometry, add = T)
+
+# recode raster to select maize (maize code = 216)
+# 22655.12 sec!
+tic()
+s <- calc(r, fun=function(x){x[x != 216] <- 0; return(x)})
+s <- calc(r, fun=function(x){x[x == 216] <- 1; return(x)})
+toc()
+
+# Calculate average for a raster of 250x250m
+# This part is not implemented as the reclassification in the previous step failed.
+output <- file.path("c:/temp/maize_share_250m.tif")
+gdalUtils::gdalwarp(input, output,  tr = c(250,250), r = "average", verbose = TRUE)
+
+plot(raster(output))
+```
+
+
+
