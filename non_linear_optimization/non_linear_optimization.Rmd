@@ -1,0 +1,76 @@
+---
+title: "Solve non-linear optimization problem with ROI package in R"
+author: "Michiel van Dijk"
+date: "06/09/2023"
+output: html_document
+---
+
+I want solve a non-linear objective function with two non-linear constraints in R. I have succesfully solved the model in [GAMS](https://www.gams.com/) but because of my general data workflow, I would like to use R instead. The idea behind the model is that I would like to calibrate a rational function (four parameters) so that it is consistent with a given dataset (resulting in two constraints), while minimizing the difference between the slope of the function and a target value (objective function). Hence the outcome of the optimization problem are the four parameters that determine the shape of the rational function. I am using the [R Optimization Infrastructure (ROI)](https://roi.r-forge.r-project.org/index.html) to solve the model. As I want to solve the model for several different cases, I created a series of functions that accept variables so the objective function and constraints can easily be updated.
+
+My model:
+
+```{r}
+library(ROI)
+
+# I installed several non-linear solvers that were suggested after running ROI_applicable_solvers() on the model
+#install.packages("ROI.plugin.alabama")
+#install.packages("ROI.plugin.nlminb")
+#install.packages("ROI.plugin.nloptr")
+
+# Empirical data for the example
+elas_sl_t <- -0.006648
+elas_by_t <- 0.2831
+gdp_cap_rel_t <- 51.69
+cal_cap_t <- 27.75
+
+# Rational function for which parameters x[] need to be solved
+elas_f <- function(x, gdp_cap) {
+  (x[1]*gdp_cap + x[2])/((gdp_cap+x[3])*(gdp_cap+x[4]))
+}
+
+# Integral of elas_f
+int_elas_f <- function(x, gdp_cap) {
+  -(x[1] * x[4] - x[2]) * log(gdp_cap + x[4])/(x[4]^2 - x[3] * x[4]) - 
+    (x[2] - x[1] * x[3]) * log(gdp_cap + x[3])/(x[3] * x[4] - x[3]^2) + x[2] * log(gdp_cap)/(x[3] * x[4])
+}
+
+# Derivative of elas_f
+der_elas_f <- function(x, gdp_cap){
+  - (x[1] * gdp_cap + x[2]) / ((gdp_cap + x[3])^2 * (gdp_cap + x[4])) -
+    (x[1] * gdp_cap + x[2]) / ((gdp_cap + x[3]) * (gdp_cap + x[4])^2) + x[1] / ((gdp_cap + x[3]) * (gdp_cap + x[4]))
+}
+
+# Objective function (should be minimized)
+obj_f <- function(x, gdp_cap = 1, elas_sl_by = elas_sl_t){
+  (der_elas_f(x, gdp_cap) - elas_sl_by)^2
+}
+
+# 1st constraint (should be equal to zero)
+con1_f <- function(x, gdp_cap = 1, elas_by = elas_by_t){
+  elas_f(x, gdp_cap) - elas_by
+}
+
+# 2nd constraint (should be equal to zero)
+con2_f <- function(x, gdp_cap_ty = gdp_cap_rel_t, gdp_cap_by = 1, cal_ty = cal_cap_t) {
+  int_elas_f(x, gdp_cap = gdp_cap_ty) - int_elas_f(x, gdp_cap = gdp_cap_by) - log(cal_ty)
+}
+
+# The solution of the model is
+param_t <- c(1245.685,  30.987, 883.645,  4.097)
+
+# check the solution
+con1_f(param_t) # close to zero, ok
+con2_f(param_t) # close to zero, ok
+obj_f(param_t) # 0.05155
+
+# Solving the model with ROI, using the actual solution as starting values
+nlp <- OP(F_objective(F = obj_f, n = 4), 
+          F_constraint(F = list(con1_f, con2_f), dir = rep("==", 2), rhs = c(0,0)),
+          maximum = FALSE)
+nlp
+sol <- ROI_solve(nlp, start = param_t, solver = "auto")
+sol
+solution(sol)
+```
+
+It seems that the model cannot be solved or perhaps I am doing something wrong. Is it possible to solve the above problem using R (with ROI or perhaps an other package)? Perhaps the available solvers are not good enough? I used the GAMS CONOPT solver to solve my problem, which is not available for ROI/R. I also managed the solve the problems with the GAMS IPOPT solver, which is available for R (https://github.com/coin-or/Ipopt) but unfortunately not as a plugin for ROI (only IPOP, which is a quadratic solver). I also tried the NEOS solver in ROI but this results in an error message as the server cannot be contacted. Any help is much appreciated.
