@@ -18,9 +18,9 @@ library(ROI)
 #install.packages("ROI.plugin.nloptr")
 
 # Empirical data for the example
-elas_sl_t <- -0.006648
-elas_by_t <- 0.2831
-gdp_cap_rel_t <- 51.69
+elas_sl_t <- -0.006648 
+elas_by_t <- 0.28314
+gdp_cap_rel_t <- 51.6876463642977
 cal_cap_t <- 27.75
 
 # Rational function for which parameters x[] need to be solved
